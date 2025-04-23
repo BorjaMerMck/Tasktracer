@@ -1,0 +1,2 @@
+C:/Users/b/Downloads/tasktracer-master/tasktracer-master/app - copia/android/app/.cxx/Debug/3i6p152s/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/b/Downloads/tasktracer-master/tasktracer-master/app - copia/android/app/.cxx/Debug/3i6p152s/x86_64/CMakeFiles/rebuild_cache.dir
