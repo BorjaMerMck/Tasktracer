@@ -209,6 +209,7 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
                       ),
                       SizedBox(height: 10),
                       SizedBox(height: 10),
+             
              /**
                       Text("Días de la semana:",
                           style: TextStyle(fontWeight: FontWeight.bold)),
