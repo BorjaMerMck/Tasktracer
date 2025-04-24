@@ -100,7 +100,8 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
     }
   }
 
-  Future<void> _addNewTask(String name, String category, bool isDaily) async {
+
+  Future<void> _addNewTask(String name, String category, bool isDaily, List<String> repeatDays) async {
     final newTask = Task(
       id: '',
       name: name,
@@ -108,9 +109,9 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
       assignedTo: selectedMember ?? 'Unassigned',
       isCompleted: false,
       isDaily: isDaily,
+      repeatDays: repeatDays,
     );
-    final doc = await _firestore.collection('homes').doc(homeId).collection(
-        'tasks').add(newTask.toMap());
+    final doc = await _firestore.collection('homes').doc(homeId).collection('tasks').add(newTask.toMap());
 
     setState(() {
       tasks.add(Task(
@@ -119,9 +120,11 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
         category: category,
         assignedTo: selectedMember ?? 'Unassigned',
         isDaily: isDaily,
+        repeatDays: repeatDays,
       ));
     });
   }
+
 
   Future<void> _toggleCompleteTask(int index) async {
     final task = tasks[index];
@@ -153,116 +156,124 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
     String selectedCategory = categories[0];
     selectedMember = null;
     bool isDaily = false;
-    List<String> selectedDays = [];
+    List<String> repeatDays = [];
 
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(
-                'Nueva tarea', style: TextStyle(fontWeight: FontWeight.bold)),
-            content: StatefulBuilder(
-              builder: (context, setState) =>
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        onChanged: (value) => newTask = value,
-                        decoration: InputDecoration(
-                          hintText: "Ingrese la tarea",
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        value: selectedCategory,
-                        onChanged: (value) =>
-                            setState(() => selectedCategory = value!),
-                        decoration: InputDecoration(
-                          labelText: "Categoría",
-                          border: OutlineInputBorder(),
-                        ),
-                        items: categories.map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(category),
-                          );
-                        }).toList(),
-                      ),
-                      SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        value: selectedMember,
-                        onChanged: (value) =>
-                            setState(() => selectedMember = value!),
-                        decoration: InputDecoration(
-                          labelText: "Asignar a",
-                          border: OutlineInputBorder(),
-                        ),
-                        items: homeMembers.map((member) {
-                          return DropdownMenuItem<String>(
-                            value: member['email'],
-                            child: Text(member['email']),
-                          );
-                        }).toList(),
-                      ),
-                      SizedBox(height: 10),
-                      SizedBox(height: 10),
-             
-             /**
-                      Text("Días de la semana:",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Wrap(
-                        spacing: 4.0,
-                        children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((
-                            day) {
-                          final isSelected = selectedDays.contains(day);
-                          return ChoiceChip(
-                            label: Text(day),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                if (isSelected) {
-                                  selectedDays.remove(day);
-                                } else {
-                                  selectedDays.add(day);
-                                }
-                              });
-                            },
-                            selectedColor: Colors.blue,
-                          );
-                        }).toList(),
-                      ),
-                 */
-                      CheckboxListTile(
-                        title: Text("¿Repetir diariamente?"),
-                        value: isDaily,
-                        onChanged: (value) {
-                          setState(() {
-                            isDaily = value ?? false;
-                          });
-                        },
-                      ),
-                    ],
+      builder: (context) => AlertDialog(
+        title: Text('Nueva tarea', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: StatefulBuilder(
+          builder: (context, setState) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  onChanged: (value) => newTask = value,
+                  decoration: InputDecoration(
+                    hintText: "Ingrese la tarea",
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
                   ),
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  onChanged: (value) => setState(() => selectedCategory = value!),
+                  decoration: InputDecoration(
+                    labelText: "Categoría",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: categories.map((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedMember,
+                  onChanged: (value) => setState(() => selectedMember = value!),
+                  decoration: InputDecoration(
+                    labelText: "Asignar a",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: homeMembers.map((member) {
+                    return DropdownMenuItem<String>(
+                      value: member['email'],
+                      child: Text(member['email']),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 15),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Repetir en:", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                SizedBox(height: 8),
+                Wrap(
+                  spacing: 6.0,
+                  children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) {
+                    final selected = repeatDays.contains(day);
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (selected) {
+                            repeatDays.remove(day);
+                          } else {
+                            repeatDays.add(day);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: selected ? Colors.green : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          day,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: selected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 10),
+                CheckboxListTile(
+                  title: Text("¿Repetir diariamente?"),
+                  value: isDaily,
+                  onChanged: (value) {
+                    setState(() {
+                      isDaily = value ?? false;
+                    });
+                  },
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (newTask.isNotEmpty) {
-                    _addNewTask(newTask, selectedCategory, isDaily);
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: Text('Añadir'),
-              ),
-            ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (newTask.isNotEmpty) {
+                _addNewTask(newTask, selectedCategory, isDaily, repeatDays);
+              }
+              Navigator.of(context).pop();
+            },
+            child: Text('Añadir'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -470,14 +481,15 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
                       ? [
                     Padding(
                       padding:
-                      const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                      const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
                       child: Wrap(
-                        spacing: 6.0,
+                        spacing: 9.0,
                         children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) {
                           final selected = task.repeatDays.contains(day);
                           return GestureDetector(
                             onTap: () {
                               setState(() {
+
                                 if (day == 'D') {
                                   task.repeatDays = ['D'];
                                 } else {
@@ -509,7 +521,7 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
                               child: Text(
                                 day,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   color: selected ? Colors.white : Colors.black,
                                   fontWeight: FontWeight.bold,
                                 ),
