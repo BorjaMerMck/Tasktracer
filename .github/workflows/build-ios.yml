@@ -1,0 +1,46 @@
+name: Build iOS .ipa
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0' # Cambia si usas otra
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS
+        run: flutter build ios --release
+
+      - name: Archive .ipa (Xcode)
+        run: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+                     -scheme Runner \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath build/Runner.xcarchive archive
+
+      - name: Export .ipa
+        run: |
+          cd ios
+          xcodebuild -exportArchive \
+                     -archivePath build/Runner.xcarchive \
+                     -exportOptionsPlist ExportOptions.plist \
+                     -exportPath build/ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: iOS App
+          path: ios/build/ipa
