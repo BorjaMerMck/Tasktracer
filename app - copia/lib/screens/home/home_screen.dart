@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../todo.dart';
-import '../../nevera.dart';
-import '../../ajustes.dart';
+import '../tasks/todo_screen.dart';
+import '../fridge/nevera_screen.dart';
+import '../settings/ajustes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
