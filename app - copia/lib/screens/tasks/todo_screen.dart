@@ -56,9 +56,14 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
 
   Future<void> _loadTasks() async {
     try {
-      final tasksSnapshot = await _firestore.collection('homes').doc(homeId).collection('tasks').get();
+      final tasksSnapshot = await _firestore
+          .collection('homes')
+          .doc(homeId)
+          .collection('tasks')
+          .get();
       setState(() {
-        tasks = tasksSnapshot.docs.map((doc) => Task.fromDocument(doc)).toList();
+        tasks =
+            tasksSnapshot.docs.map((doc) => Task.fromDocument(doc)).toList();
       });
     } catch (e) {
       print("Error loading tasks: $e");
@@ -83,7 +88,8 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
 
       setState(() {
         homeMembers = members
-            .map((member) => {
+            .map((member) =>
+        {
           'uid': member['uid'],
           'email': member['email'],
         })
@@ -94,17 +100,26 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
     }
   }
 
-  Future<void> _addNewTask(String taskName, String category) async {
+  Future<void> _addNewTask(String name, String category, bool isDaily) async {
     final newTask = Task(
       id: '',
-      name: taskName,
+      name: name,
       category: category,
       assignedTo: selectedMember ?? 'Unassigned',
       isCompleted: false,
+      isDaily: isDaily,
     );
-    final taskDoc = await _firestore.collection('homes').doc(homeId).collection('tasks').add(newTask.toMap());
+    final doc = await _firestore.collection('homes').doc(homeId).collection(
+        'tasks').add(newTask.toMap());
+
     setState(() {
-      tasks.add(Task(id: taskDoc.id, name: taskName, category: category, assignedTo: selectedMember ?? 'Unassigned'));
+      tasks.add(Task(
+        id: doc.id,
+        name: name,
+        category: category,
+        assignedTo: selectedMember ?? 'Unassigned',
+        isDaily: isDaily,
+      ));
     });
   }
 
@@ -112,7 +127,8 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
     final task = tasks[index];
     task.isCompleted = !task.isCompleted;
 
-    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(task.id).update({
+    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(
+        task.id).update({
       'isCompleted': task.isCompleted,
     });
 
@@ -124,7 +140,8 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
 
   Future<void> _deleteTask(int index) async {
     final task = tasks[index];
-    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(task.id).delete();
+    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(
+        task.id).delete();
 
     setState(() {
       tasks.removeAt(index);
@@ -135,169 +152,214 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
     String newTask = '';
     String selectedCategory = categories[0];
     selectedMember = null;
+    bool isDaily = false;
+    List<String> selectedDays = [];
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Nueva tarea', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              onChanged: (value) {
-                newTask = value;
-              },
-              decoration: InputDecoration(
-                hintText: "Ingrese la tarea",
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
+      builder: (context) =>
+          AlertDialog(
+            title: Text(
+                'Nueva tarea', style: TextStyle(fontWeight: FontWeight.bold)),
+            content: StatefulBuilder(
+              builder: (context, setState) =>
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        onChanged: (value) => newTask = value,
+                        decoration: InputDecoration(
+                          hintText: "Ingrese la tarea",
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: selectedCategory,
+                        onChanged: (value) =>
+                            setState(() => selectedCategory = value!),
+                        decoration: InputDecoration(
+                          labelText: "Categoría",
+                          border: OutlineInputBorder(),
+                        ),
+                        items: categories.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: selectedMember,
+                        onChanged: (value) =>
+                            setState(() => selectedMember = value!),
+                        decoration: InputDecoration(
+                          labelText: "Asignar a",
+                          border: OutlineInputBorder(),
+                        ),
+                        items: homeMembers.map((member) {
+                          return DropdownMenuItem<String>(
+                            value: member['email'],
+                            child: Text(member['email']),
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(height: 10),
+             /**
+                      Text("Días de la semana:",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Wrap(
+                        spacing: 4.0,
+                        children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((
+                            day) {
+                          final isSelected = selectedDays.contains(day);
+                          return ChoiceChip(
+                            label: Text(day),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (isSelected) {
+                                  selectedDays.remove(day);
+                                } else {
+                                  selectedDays.add(day);
+                                }
+                              });
+                            },
+                            selectedColor: Colors.blue,
+                          );
+                        }).toList(),
+                      ),
+                 */
+                      CheckboxListTile(
+                        title: Text("¿Repetir diariamente?"),
+                        value: isDaily,
+                        onChanged: (value) {
+                          setState(() {
+                            isDaily = value ?? false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
             ),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: selectedCategory,
-              onChanged: (value) {
-                setState(() {
-                  selectedCategory = value!;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: "Categoría",
-                border: OutlineInputBorder(),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
               ),
-              items: categories.map((String category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: selectedMember,
-              onChanged: (value) {
-                setState(() {
-                  selectedMember = value!;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: "Asignar a",
-                border: OutlineInputBorder(),
+              ElevatedButton(
+                onPressed: () {
+                  if (newTask.isNotEmpty) {
+                    _addNewTask(newTask, selectedCategory, isDaily);
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text('Añadir'),
               ),
-              items: homeMembers.map((member) {
-                return DropdownMenuItem<String>(
-                  value: member['email'],
-                  child: Text(member['email'] ?? 'Unassigned'),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (newTask.isNotEmpty) {
-                _addNewTask(newTask, selectedCategory);
-              }
-              Navigator.of(context).pop();
-            },
-            child: Text('Añadir'),
-          ),
-        ],
-      ),
     );
   }
 
+
   void _showEditTaskDialog(int index) {
-    final TextEditingController controller = TextEditingController(text: tasks[index].name);
+    final TextEditingController controller = TextEditingController(
+        text: tasks[index].name);
     String selectedCategory = tasks[index].category;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Editar tarea', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: "Ingrese la tarea actualizada",
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
+      builder: (context) =>
+          AlertDialog(
+            title: Text(
+                'Editar tarea', style: TextStyle(fontWeight: FontWeight.bold)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: "Ingrese la tarea actualizada",
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCategory = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Categoría",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: categories.map((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: selectedCategory,
-              onChanged: (value) {
-                setState(() {
-                  selectedCategory = value!;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: "Categoría",
-                border: OutlineInputBorder(),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
               ),
-              items: categories.map((String category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancelar', style: TextStyle(color: Colors.grey)),
+              ElevatedButton(
+                onPressed: () {
+                  if (controller.text.isNotEmpty) {
+                    _editTask(index, controller.text, selectedCategory);
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text('Guardar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                _editTask(index, controller.text, selectedCategory);
-              }
-              Navigator.of(context).pop();
-            },
-            child: Text('Guardar'),
-          ),
-        ],
-      ),
     );
   }
 
-  Future<void> _editTask(int index, String newTaskName, String newCategory) async {
+  Future<void> _editTask(int index, String newTaskName,
+      String newCategory) async {
     final task = tasks[index];
     task.name = newTaskName;
     task.category = newCategory;
 
-    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(task.id).update(task.toMap());
+    await _firestore.collection('homes').doc(homeId).collection('tasks').doc(
+        task.id).update(task.toMap());
 
     setState(() {
       tasks[index] = task;
     });
   }
+
+
   @override
   Widget build(BuildContext context) {
-    final filteredTasks = _filterTasks(); // Aplicar el filtro de tareas
+    final filteredTasks = _filterTasks();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Text(
-          'To-Do List',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Lista de Tareas',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         actions: [
           DropdownButton<String>(
@@ -337,48 +399,127 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
               child: Icon(Icons.delete, color: Colors.white),
             ),
             child: Card(
-              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              elevation: 2,
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                title: Text(
-                  task.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
-                  ),
-                ),
-                subtitle: Text(
-                  '${task.category} - Asignado a: ${task.assignedTo}',
-                  style: TextStyle(color: Colors.indigo, fontSize: 14),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-                        color: task.isCompleted ? Colors.green : Colors.grey,
-                      ),
-                      onPressed: () => _toggleCompleteTask(index),
-                      tooltip: 'Completar',
-                    ),
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.more_vert),
-                      onSelected: (String choice) {
-                        if (choice == 'Editar') {
-                          _showEditTaskDialog(index);
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                        const PopupMenuItem<String>(
-                          value: 'Editar',
-                          child: Text('Editar'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 4,
+              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          task.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: task.isCompleted
+                                ? Colors.green
+                                : task.isDaily
+                                ? Colors.blue[800]
+                                : Colors.black,
+                            decoration: task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
                         ),
-                      ],
+                      ),
+                      if (task.isDaily)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.repeat, size: 18, color: Colors.blueAccent),
+                        ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    '${task.category} - Asignado a: ${task.assignedTo}',
+                    style: TextStyle(color: Colors.indigo, fontSize: 14),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: task.isCompleted ? Colors.green : Colors.grey,
+                        ),
+                        onPressed: () => _toggleCompleteTask(index),
+                        tooltip: 'Completar',
+                      ),
+                      PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert),
+                        onSelected: (String choice) {
+                          if (choice == 'Editar') {
+                            _showEditTaskDialog(index);
+                          }
+                        },
+                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                          const PopupMenuItem<String>(
+                            value: 'Editar',
+                            child: Text('Editar'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  children: task.isDaily
+                      ? [
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                      child: Wrap(
+                        spacing: 6.0,
+                        children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) {
+                          final selected = task.repeatDays.contains(day);
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (day == 'D') {
+                                  task.repeatDays = ['D'];
+                                } else {
+                                  if (task.repeatDays.contains('D')) {
+                                    task.repeatDays.remove('D');
+                                  }
+                                  if (selected) {
+                                    task.repeatDays.remove(day);
+                                  } else {
+                                    task.repeatDays.add(day);
+                                  }
+                                }
+
+                                _firestore
+                                    .collection('homes')
+                                    .doc(homeId)
+                                    .collection('tasks')
+                                    .doc(task.id)
+                                    .update({'repeatDays': task.repeatDays});
+                              });
+                            },
+                            child: Container(
+                              padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: selected ? Colors.green : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                day,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: selected ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ],
+                  ]
+                      : [],
                 ),
               ),
             ),
@@ -387,9 +528,9 @@ class _ToDoScreenState extends State<ToDoScreen> with SingleTickerProviderStateM
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTaskDialog,
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
         tooltip: 'Añadir nueva tarea',
+        child: Icon(Icons.add_task_rounded, size: 28),
+        backgroundColor: Colors.blue,
       ),
     );
   }

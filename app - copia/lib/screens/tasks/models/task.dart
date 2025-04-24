@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Task {
@@ -8,6 +6,9 @@ class Task {
   String category;
   String assignedTo;
   bool isCompleted;
+  bool isDaily;
+  List<String> repeatDays;
+  bool isExpanded;
 
   Task({
     required this.id,
@@ -15,6 +16,9 @@ class Task {
     required this.category,
     required this.assignedTo,
     this.isCompleted = false,
+    this.isDaily = false,
+    this.repeatDays = const [],
+    this.isExpanded = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,16 +27,21 @@ class Task {
       'category': category,
       'assignedTo': assignedTo,
       'isCompleted': isCompleted,
+      'isDaily': isDaily,
+      if (repeatDays.isNotEmpty) 'repeatDays': repeatDays,
     };
   }
 
   factory Task.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return Task(
       id: doc.id,
-      name: doc['name'],
-      category: doc['category'],
-      assignedTo: doc['assignedTo'],
-      isCompleted: doc['isCompleted'],
+      name: data['name'],
+      category: data['category'],
+      assignedTo: data['assignedTo'],
+      isCompleted: data['isCompleted'] ?? false,
+      isDaily: data['isDaily'] ?? false,
+      repeatDays: List<String>.from(data['repeatDays'] ?? []),
     );
   }
 }
