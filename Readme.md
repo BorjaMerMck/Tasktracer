@@ -32,8 +32,8 @@
 
 ### Pantalla de Inicio
 A continuación se muestra la pantalla inicial de la aplicación:
-
-<img src="https://gitlab.com/borjamerchan/tasktracer/-/raw/master/TFG/img/img/splaah.jpeg?ref_type=heads" alt="Pantalla de Splaash" width="100" />
+<p>
+<img src="https://gitlab.com/borjamerchan/tasktracer/-/raw/master/TFG/img/img/splaah.jpeg?ref_type=heads" alt="Pantalla de Splaash" width="100"  />
 
 <img src="https://gitlab.com/borjamerchan/tasktracer/-/raw/master/TFG/img/img/welcome.jpeg?ref_type=heads" alt="Pantalla de welcome " width="100" />
 
@@ -45,7 +45,7 @@ A continuación se muestra la pantalla inicial de la aplicación:
 
 <img src="https://gitlab.com/borjamerchan/tasktracer/-/raw/master/TFG/img/img/correo.jpeg?ref_type=heads" alt="Pantalla de register verificaion 2 " width="100" />
 <img src="https://gitlab.com/borjamerchan/tasktracer/-/raw/master/TFG/img/img/verificacio.png?ref_type=heads" alt="Pantalla de register verificaion 2 " width="100" />
-
+</p>
 ## futures upgrades
 
 - add task descripcion
