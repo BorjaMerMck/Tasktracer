@@ -1,3 +1,10 @@
+
+<p align="center">
+  <img src="https://github.com/BorjaMerMck/Tasktracer/blob/main/TFG/fotomain.png" alt="FotomainAplicacion" width="110" />
+</p>
+
+
+
 # Tasktracer flutter application for my TFG "Trabajo de Final de Grado" (Bachelor´s Degree Final Project)
 
 **TaskTracer** es una aplicación multiplataforma desarrollada en Flutter para la gestión de tareas y productos en el hogar. Permite a los usuarios organizar sus tareas diarias y llevar un control de los productos disponibles en su nevera utilizando una interfaz visual estilo Kanban.
