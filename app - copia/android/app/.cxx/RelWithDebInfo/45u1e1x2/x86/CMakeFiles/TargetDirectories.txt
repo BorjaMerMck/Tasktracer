@@ -1,2 +1,0 @@
-C:/Users/b/Documents/Tasktracer/app - copia/android/app/.cxx/RelWithDebInfo/45u1e1x2/x86/CMakeFiles/edit_cache.dir
-C:/Users/b/Documents/Tasktracer/app - copia/android/app/.cxx/RelWithDebInfo/45u1e1x2/x86/CMakeFiles/rebuild_cache.dir

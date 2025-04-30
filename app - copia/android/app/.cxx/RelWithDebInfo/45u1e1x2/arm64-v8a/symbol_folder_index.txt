@@ -1,1 +1,0 @@
-C:\Users\b\Documents\Tasktracer\app - copia\build\app\intermediates\cxx\RelWithDebInfo\45u1e1x2\obj\arm64-v8a
