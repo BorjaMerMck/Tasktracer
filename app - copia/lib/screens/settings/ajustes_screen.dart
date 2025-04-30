@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../auth/login_screen.dart';
+import '../../main.dart'; // Asegúrate de que esta importación sea válida
 
 class AjustesScreen extends StatefulWidget {
   @override
@@ -164,6 +166,38 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 ),
               ),
             ),
+            DropdownButtonFormField<String>(
+              value: MyApp.themeNotifier.value.name,
+              items: [
+                DropdownMenuItem(value: 'light', child: Text('Claro')),
+                DropdownMenuItem(value: 'dark', child: Text('Oscuro')),
+                DropdownMenuItem(value: 'system', child: Text('Adaptar al sistema')),
+              ],
+              onChanged: (value) async {
+                if (value == null) return;
+
+                ThemeMode newMode;
+                switch (value) {
+                  case 'light':
+                    newMode = ThemeMode.light;
+                    break;
+                  case 'dark':
+                    newMode = ThemeMode.dark;
+                    break;
+                  default:
+                    newMode = ThemeMode.system;
+                }
+
+                MyApp.themeNotifier.value = newMode;
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('themeMode', value);
+              },
+              decoration: InputDecoration(
+                labelText: 'Tema de la aplicación',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () async {
                 await _auth.signOut();

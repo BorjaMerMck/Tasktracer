@@ -130,7 +130,7 @@ class _RegistrarScreenState extends State<RegistrarScreen> {
                 Container(
                   padding: EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(8.0),
                     border: Border.all(color: Colors.blue.shade200),
                   ),

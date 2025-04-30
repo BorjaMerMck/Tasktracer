@@ -6,7 +6,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MyTheme.lightGray,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -20,17 +20,16 @@ class WelcomeScreen extends StatelessWidget {
             SizedBox(height: 20),
             Text(
               '¡Bienvenido a Tasktraker!',
-              style: TextStyle(
-                fontSize: 32,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: MyTheme.darkBlue,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
             Text(
               'Organiza tus tareas diarias y gestiona los productos de tu nevera con facilidad.',
-              style: TextStyle(fontSize: 18, color: MyTheme.darkBlue),
+              style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 40),

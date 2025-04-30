@@ -279,7 +279,7 @@ class _NeveraScreenState extends State<NeveraScreen> with SingleTickerProviderSt
                 ),
                 Expanded(
                   child: Container(
-                    color: Colors.grey[200],
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: DragTarget<Product>(
                       onAccept: (product) => _moveProduct(product, status),
                       builder: (_, __, ___) => ListView(

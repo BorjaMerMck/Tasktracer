@@ -31,22 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.fact_check_outlined),
-            activeIcon: Icon(Icons.fact_check_outlined, color: Colors.blue),
+            activeIcon: Icon(Icons.fact_check_outlined, color: Theme.of(context).primaryColor),
             label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.production_quantity_limits_rounded),
-            activeIcon: Icon(Icons.production_quantity_limits_rounded, color: Colors.blue),
+            activeIcon: Icon(Icons.production_quantity_limits_rounded, color: Theme.of(context).primaryColor),
             label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            activeIcon: Icon(Icons.settings, color: Colors.blue),
+            activeIcon: Icon(Icons.settings, color: Theme.of(context).primaryColor),
             label: '',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: false,
         showUnselectedLabels: false,
