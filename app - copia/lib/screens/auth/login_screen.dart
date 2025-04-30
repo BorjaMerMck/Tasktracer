@@ -216,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                   child: Text(
-                    '¿No tienes una cuenta? Regístrate',
+                    '¿No tienes una cuenta? Regístrate.',
                     style: TextStyle(fontSize: 16, color: MyTheme.darkBlue),
                   ),
                 ),
