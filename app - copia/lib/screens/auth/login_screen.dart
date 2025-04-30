@@ -74,6 +74,32 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, introduce tu correo electrónico.')),
+      );
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Se ha enviado un enlace de recuperación al correo.')),
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Error al enviar el correo de recuperación.';
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No se encontró ningún usuario con ese correo.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -153,6 +179,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     return null;
                   },
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _resetPassword,
+                    child: Text(
+                      '¿Olvidaste tu contraseña?',
+                      style: TextStyle(color: MyTheme.darkBlue),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 20),
                 _isLoading
